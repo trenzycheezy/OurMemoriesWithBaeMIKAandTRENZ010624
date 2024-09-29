@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffe6e6;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://example.com/heart-background.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #ff4d4d;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 50px;
+        }
+        .button {
+            background-color: #ff8080;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .button:hover {
+            background-color: #ff4d4d;
+            transform: translateY(-5px);
+        }
+        .content {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .floating-heart {
+            position: fixed;
+            font-size: 2em;
+            color: #ff8080;
+            opacity: 0.5;
+            animation: float 5s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .credits {
+            text-align: center;
+            margin-top: 50px;
+            font-style: italic;
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Our Memories</h1>
+        <div class="button-container">
+            <button class="button" onclick="showMemories()">Our Stash of Memories</button>
+            <button class="button" onclick="showGifts()">The Gifts We Sent</button>
+            <button class="button" id="adminButton" style="display: none;" onclick="showAdminPanel()">Admin Panel</button>
+        </div>
+        <div id="content" class="content"></div>
+        <div class="credits">Created with love by Trenz</div>
+    </div>
+
+    <script>
+        // Add floating hearts
+        for (let i = 0; i < 10; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.top = `${Math.random() * 100}vh`;
+            heart.style.animationDelay = `${Math.random() * 5}s`;
+            heart.innerHTML = '❤';
+            document.body.appendChild(heart);
+        }
+
+        function showMemories() {
+            document.getElementById('content').innerHTML = `
+                <h2>Our Stash of Memories</h2>
+                <input type="file" accept="image/*" onchange="uploadImage(this.files, 'memories')">
+                <div id="memoriesGallery"></div>
+            `;
+            loadImages('memories');
+        }
+
+        function showGifts() {
+            document.getElementById('content').innerHTML = `
+                <h2>The Gifts We Sent</h2>
+                <input type="file" accept="image/*" onchange="uploadImage(this.files, 'gifts')">
+                <div id="giftsGallery"></div>
+            `;
+            loadImages('gifts');
+        }
+
+        function uploadImage(files, category) {
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '200px';
+                img.style.margin = '10px';
+                document.getElementById(`${category}Gallery`).appendChild(img);
+                
+                // Save to localStorage
+                const savedImages = JSON.parse(localStorage.getItem(category) || '[]');
+                savedImages.push(e.target.result);
+                localStorage.setItem(category, JSON.stringify(savedImages));
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function loadImages(category) {
+            const savedImages = JSON.parse(localStorage.getItem(category) || '[]');
+            const gallery = document.getElementById(`${category}Gallery`);
+            savedImages.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.style.width = '200px';
+                img.style.margin = '10px';
+                gallery.appendChild(img);
+            });
+        }
+
+        // Check if user is admin
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        if (email === 'cheezytrenzy@gmail.com') {
+            document.getElementById('adminButton').style.display = 'inline-block';
+        }
+
+        function showAdminPanel() {
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    const ipAddress = data.ip;
+                    const lastVisitedSite = document.referrer || 'Unknown';
+                    const userAgent = navigator.userAgent;
+                    
+                    document.getElementById('content').innerHTML = `
+                        <h2>Admin Panel</h2>
+                        <p>Visitor IP: ${ipAddress}</p>
+                        <p>Email: ${email}</p>
+                        <p>Last Visited Site: ${lastVisitedSite}</p>
+                        <p>Browser Info: ${userAgent}</p>
+                    `;
+                });
+        }
+    </script>
+</body>
+</html
